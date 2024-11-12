@@ -1,0 +1,71 @@
+include <stdlib.h>
+#include <string.h>
+
+typedef struct cadastro_aluno{
+			 char nome[80];
+			 char RA[7];
+			 float nota[2]; //notas de provas – considerar 2 provas
+			 float media; //média aritmética das provas
+}typeAluno;
+
+void aloca (typeAluno **p, int tam);
+
+int main(){
+	typeAluno *ptrAluno = NULL;
+	int opMenu;
+	char opLoop;
+	int cont = 0;
+	float media;
+	char search[7];
+	bool achou = false;
+	int contSearch = 0;
+	do{
+		printf("[1] Cadastro\n[2] Controle de Notas");
+		scanf("%i", &opMenu);
+		fflush(stdin);
+		switch (opMenu){
+			case (1):
+				aloca(&ptrAluno,cont+1);
+				cont++;
+				printf("Digite o nome do aluno: ");
+				gets(ptrAluno->nome);
+				fflush(stdin);
+				printf("Digite o RA do aluno: ");
+				gets(ptrAluno->RA);
+				fflush(stdin);
+				printf("Digite a nota 1 do aluno: ");
+				scanf("%f",&ptrAluno->nota[0]);
+				fflush(stdin);
+				printf("Digite a nota 2 do aluno: ");
+				scanf("%f",&ptrAluno->nota[1]);
+				fflush(stdin);
+				media = (ptrAluno->nota[1] + ptrAluno->nota[0])/2;
+				printf("Cadastro Concluido:\nNome:%s\nRA: %s\nNota 1:%f\nNota 2:%f\nMedia: %.2f",ptrAluno->nome,ptrAluno->RA,ptrAluno->nota[0],ptrAluno->nota[1],media);
+				break;
+			case (2):
+				printf("Digite o RA do aluno: ");
+				gets(search);
+				do{
+					if(strcmp(search,ptrAluno[contSearch].RA)){
+						achou = true;
+						printf("aqui acabou");
+					}
+					else{
+						contSearch++;
+					}
+				}while(achou == false);
+				break;
+		};
+		printf("Deseja retornar ao menu? S/N");
+		scanf("%c", &opLoop);
+	}while(opLoop != 'n' && opLoop != 'N');
+}
+
+void aloca (typeAluno **p, int tam){
+	if((*p=(typeAluno*)realloc(*p,tam*sizeof(typeAluno)))==NULL){
+		exit(1);
+	}
+	else{
+		printf("alocado");
+	}
+}
