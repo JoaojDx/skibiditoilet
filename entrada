@@ -1,0 +1,156 @@
+include <stdio.h>
+#include <stdlib.h>
+
+typedef struct hospede {
+  int num_quartoH;
+  char nome[80];
+  int qtd_acompanhante; 
+  char SFH;            
+  int dias;            
+} hospede;
+
+typedef struct quarto {
+  int num_quartoQ;
+  char SFQ;
+  char status;
+} quarto;
+
+void alocaHospede(hospede **p, int tam);
+void alocaQuarto(quarto **p, int tam);
+void cadastro_hospede(hospede *ph, quarto *pq, int contadora);
+void cadastro_quarto(quarto *ph);
+void checkout(quarto *pq, hospede *ph);
+
+int main() {
+  quarto *ptrQuarto = NULL;
+  hospede *ptrHospede = NULL;
+  int cont = 1, op2;
+  char op1;
+  alocaQuarto(&ptrQuarto, 3);
+  cadastro_quarto(ptrQuarto);
+  do {
+    printf("Digite a operação que deseja: \n[1] - Checkin \n[2] - CheckOut \n[3] - Fim\n");
+    scanf(" %i", &op2);
+		if (op2 == 1) {
+      alocaHospede(&ptrHospede, cont);
+      cadastro_hospede(ptrHospede, ptrQuarto, cont);
+      cont++;
+    } else if (op2 == 2) {
+      checkout( ptrQuarto,ptrHospede);
+    } else if (op2 == 3) {
+      printf("Fim do programa.\n");
+    }
+    printf("Deseja continuar? (S/N): ");
+    scanf(" %c", &op1);
+  } while (op1 != 'n' && op1 != 'N');
+}
+
+void checkout(quarto *pq, hospede *ph){
+	int opcao;
+	int cobranca;
+	int i;
+	fflush(stdin);
+	printf("Digite o quarto a ser encerrado");
+	scanf("%i", &opcao);
+	for(i=0;i<3;i++,pq++){
+		if (opcao == pq->	num_quartoQ){
+			printf("%i", pq->num_quartoQ);
+			pq[i].status = 'L';
+			break;
+		}
+	}
+	
+	 if (pq->SFQ == 's') {
+        cobranca = ph->dias * 85;  // Quarto solteiro: R$85 por dia
+    } else {
+        cobranca = ph->dias * 75;  // Quarto familiar: R$75 por dia
+    }
+    fflush(stdin);
+	printf("Status do Quarto\n");
+    printf("Número do quarto: %i\n", pq[i].num_quartoQ);
+    printf("Nome do hóspede: %c\n", ph[i].nome);  // Corrigido para %s, já que é uma string
+    printf("Quantidade de acompanhantes: %i\n", ph[i].qtd_acompanhante);
+    printf("Categoria: %c\n", pq[i].SFQ);
+    printf("Tempo de estadia: %i dias\n", ph[i].dias);
+    printf("Valor a ser pago: R$ %i\n", cobranca);
+}
+
+void cadastro_quarto(quarto *ph) {
+  int i;
+  for (i = 0; i < 3; i++, ph++) {
+    ph->num_quartoQ = i + 1;
+
+    printf("Digite a categoria do quarto [%i]: ", ph->num_quartoQ);
+    scanf(" %c", &ph->SFQ);
+
+    ph->status = 'L';
+  }
+}
+
+void cadastro_hospede(hospede *ph, quarto *pq, int contadora) {
+  contadora = 1;
+  int i;
+  fflush(stdin);
+  printf("\nQual seu nome? ");
+  gets(ph->nome);
+  printf("\nQuantos acompanhantes? ");
+  scanf("%i", &ph->qtd_acompanhante);
+  if (ph->qtd_acompanhante == 0) {
+    ph->SFH = 's';
+    for (i = 0; i < 3; i++, pq++) {
+        if (ph->SFH == pq->SFQ && pq->status != 'O') {
+            ph->num_quartoH = pq->num_quartoQ;
+            pq->status = 'O';
+            printf("\nVocê pegou um quarto de solteiro.\n");
+            break;
+        }
+    }
+
+    if (i == 3) { 
+        printf("Nenhum quarto disponível de solteiro.\n");
+        return;
+    }
+
+} else {
+    ph->SFH = 'f';  
+    for (i = 0; i < 3; i++, pq++) {
+        if (ph->SFH == pq->SFQ && pq->status != 'O') {
+            ph->num_quartoH = pq->num_quartoQ;
+            pq->status = 'O';
+            printf("\nVocê pegou um quarto de família.\n");
+            break;
+        }
+    }
+
+    if (i == 3) { 
+        printf("Nenhum quarto disponível de família.\n");
+        return;
+    }
+}
+
+  fflush(stdin);
+  printf("\nQuantos dias de estadia? ");
+  scanf("%i", &ph->dias);
+  fflush(stdin);
+
+  printf("\nInformações da Reserva\nNome: ");
+  puts(ph->nome);
+
+  pq->SFQ = ph->SFH;
+  printf("Acompanhantes: %i\nDias de Estadia: %i\n", ph->qtd_acompanhante, ph->dias);
+  printf("\nInformações do Quarto:\nNúmero: %i\nCategoria: %c\nStatus: %c\n",
+         pq->num_quartoQ, pq->SFQ, pq->status);
+  contadora++;
+}
+
+void alocaHospede(hospede **p, int tam) {
+  if ((*p = (hospede *)realloc(*p, tam * sizeof(hospede))) == NULL) {
+    exit(1);
+  }
+}
+
+void alocaQuarto(quarto **p, int tam) {
+  if ((*p = (quarto *)realloc(*p, tam * sizeof(quarto))) == NULL) {
+    exit(1);
+  } 
+}
