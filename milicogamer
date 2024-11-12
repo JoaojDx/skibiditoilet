@@ -1,0 +1,163 @@
+include <locale.h>
+#include <string.h>
+
+typedef struct carreira {
+    int reg; // registro da patente
+    int qmilitar; // quantidade de militares daquela patente
+    char org[50]; // organização - exemplo: exército, aeronáutica, marinha
+    char patente[20]; // exemplo: soldado, cabo, sargento
+    float salario; // valor do salário
+} carreira;
+
+typedef struct militar {
+    char CPF[13]; // CPF do militar
+    char nome[20]; // nome do militar
+    int numreg; // número do registro da carreira
+} militar;
+
+void alocaCarreira(carreira **p, int tam);
+void alocaMilitar(militar **p, int tam);
+void cadastroPatentes(carreira *p);
+void mostraPatentes(carreira *p);
+
+int main() {
+    setlocale(LC_ALL, "");
+    militar *ponteiroMilitar = NULL;
+    carreira *ponteiroCarreira = NULL;
+    alocaCarreira(&ponteiroCarreira, 2);
+    int op1;
+    char op2;
+    int cont = 0;
+
+    cadastroPatentes(ponteiroCarreira);
+    mostraPatentes(ponteiroCarreira);
+
+    do {
+        alocaMilitar(&ponteiroMilitar, cont + 1);
+        cont++;
+        fflush(stdin);
+
+        printf("\n[1] Cadastro Militar\n[2] Troca Patente\n[3] Mostra Patente\n");
+        scanf("%i", &op1);
+        fflush(stdin);
+
+        if (op1 == 1) {
+            printf("\nCadastro Militar selecionado.\n");
+
+            printf("\nDigite seu CPF: ");
+            gets(ponteiroMilitar->CPF);  // Usando gets aqui
+            fflush(stdin);
+
+            printf("\nDigite seu Nome: ");
+            gets(ponteiroMilitar->nome);  // Usando gets para o nome
+            fflush(stdin);
+
+            mostraPatentes(ponteiroCarreira);
+            printf("\nDigite o registro da organização e patente desejada: ");
+            scanf("%i", &ponteiroMilitar->numreg);  // Leitura do registro da patente
+            fflush(stdin);
+
+            for (int i = 0; i < 2; i++) {  // Usando índice ao invés de manipular ponteiro
+                if (ponteiroMilitar->numreg == ponteiroCarreira[i].reg) {
+                    ponteiroCarreira[i].qmilitar += 1;  // Incrementa a quantidade de militares
+                }
+            }
+            mostraPatentes(ponteiroCarreira);  // Exibe as patentes atualizadas
+        } else if (op1 == 2) {  // Troca de patente
+            char CPFComp[13];
+            printf("\nTroca Patente selecionada.\n");
+            printf("\nDigite seu CPF: ");
+            gets(CPFComp);  // Usando gets para CPF
+            fflush(stdin);
+
+            // Verificando se o CPF corresponde a um militar já cadastrado
+            int militarEncontrado = 0;
+            for (int i = 0; i < cont; i++) {
+                if (strcmp(CPFComp, ponteiroMilitar[i].CPF) == 0) {
+                    printf("\nMilitar encontrado: %s\n", ponteiroMilitar[i].nome);
+                    printf("Patente atual: %s\n", ponteiroCarreira[ponteiroMilitar[i].numreg - 1].patente);
+                    printf("\nEscolha a nova patente:\n");
+
+                    // Mostrar as patentes disponíveis
+                    for (int j = 0; j < 2; j++) {
+                        printf("%d - %s\n", ponteiroCarreira[j].reg, ponteiroCarreira[j].patente);
+                    }
+
+                    int novaPatente;
+                    printf("\nDigite o número da nova patente: ");
+                    scanf("%d", &novaPatente);
+                    fflush(stdin);
+
+                    // Verifica se a patente é válida
+                    if (novaPatente >= 1 && novaPatente <= 2) {
+                        // Atualiza a patente do militar
+                        ponteiroMilitar[i].numreg = novaPatente;
+                        printf("\nPatente alterada para: %s\n", ponteiroCarreira[novaPatente - 1].patente);
+
+                        // Atualiza as quantidades de militares nas patentes
+                        for (int j = 0; j < 2; j++) {
+                            if (ponteiroCarreira[j].reg == novaPatente) {
+                                ponteiroCarreira[j].qmilitar++;
+                            }
+                        }
+                    } else {
+                        printf("Patente inválida!\n");
+                    }
+
+                    militarEncontrado = 1;
+                    break;
+                }
+            }
+
+            if (!militarEncontrado) {
+                printf("\nMilitar não encontrado com o CPF informado.\n");
+            }
+        } else if (op1 == 3) {
+            printf("\nMostra Patente selecionado.\n");
+            mostraPatentes(ponteiroCarreira);
+        }
+
+        printf("\nDeseja voltar ao menu? (S/N): ");
+        scanf(" %c", &op2);  // Corrigido para evitar problemas com '\n'
+        fflush(stdin);
+
+    } while(op2 != 'n' && op2 != 'N');
+}
+
+void mostraPatentes(carreira *p) {
+    for (int i = 0; i < 2; i++) {
+        printf("\nRegistro: %i\nOrganização: %s\nPatente: %s\nNúmero de Membros: %i\n",
+               p[i].reg, p[i].org, p[i].patente, p[i].qmilitar);  // Acessando usando índice
+    }
+}
+
+void cadastroPatentes(carreira *p) {
+    for (int i = 0; i < 2; i++) {
+        printf("\nDigite a organização em que deseja cadastrar: ");
+        fflush(stdin);
+        gets(p[i].org);  // Usando gets
+        fflush(stdin);
+
+        p[i].reg = i + 1;
+        printf("Digite a patente dessa organização: ");
+        gets(p[i].patente);  // Usando gets para a patente
+        fflush(stdin);
+
+        p[i].qmilitar = 0;
+        printf("Digite o salário da patente: ");
+        scanf("%f", &p[i].salario);
+        fflush(stdin);
+    }
+}
+
+void alocaCarreira(carreira **p, int tam) {
+    if ((*p = (carreira*)realloc(*p, tam * sizeof(carreira))) == NULL) {
+        exit(1);
+    }
+}
+
+void alocaMilitar(militar **p, int tam) {
+    if ((*p = (militar*)realloc(*p, tam * sizeof(militar))) == NULL) {
+        exit(1);
+    }
+}
